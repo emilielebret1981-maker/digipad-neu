@@ -1,0 +1,10 @@
+{
+  "name": "digipad-to-1cours1bot",
+  "version": "1.0.0",
+  "description": "Transforme un export Digipad en base de connaissances pour 1cours1bot",
+  "license": "MIT",
+  "dependencies": {
+    "node-fetch": "^3.3.2",
+    "cheerio": "^1.0.0"
+  }
+}
