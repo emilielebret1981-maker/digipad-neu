@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digipad → 1cours1bot</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F5F2EC;--surface:#FFF;--surface2:#EDEAE3;--border:#DDD9D0;--border2:#C4BFB5;
+  --text:#1A1714;--text2:#605B53;--text3:#9C9790;
+  --green:#1A6B3C;--green-bg:#E6F4ED;--green-border:#A0D4B8;--green-dark:#145530;
+  --blue:#1A4080;--blue-bg:#E8EDF8;--blue-border:#A0B4E0;
+  --amber:#7A5000;--amber-bg:#FFF4D6;--amber-border:#EAC870;
+  --red:#8A2020;--red-bg:#FAE8E8;--red-border:#E0A0A0;
+  --r:12px;--rs:7px;--shadow:0 1px 4px rgba(0,0,0,0.06),0 2px 12px rgba(0,0,0,0.04);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.wrap{max-width:760px;margin:0 auto;padding:2.5rem 1.5rem 5rem;}
+
+/* HEADER */
+.header{text-align:center;margin-bottom:2.5rem;}
+.logo{width:48px;height:48px;background:var(--green);border-radius:13px;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;}
+.logo svg{width:26px;height:26px;fill:none;stroke:white;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+h1{font-family:'DM Serif Display',serif;font-size:30px;font-weight:400;}
+.header p{font-size:13px;color:var(--text2);margin-top:8px;line-height:1.65;}
+
+/* NAV */
+.nav{display:flex;align-items:center;margin-bottom:2rem;}
+.nd{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.nc{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:var(--text3);background:var(--surface);transition:all .2s;flex-shrink:0;}
+.nc.on{border-color:var(--green);background:var(--green);color:white;}
+.nc.ok{border-color:var(--green);background:var(--green-bg);color:var(--green);}
+.nl{font-size:11px;color:var(--text3);white-space:nowrap;}
+.nl.on{color:var(--text);font-weight:500;}.nl.ok{color:var(--green);}
+.nline{flex:1;height:1px;background:var(--border);margin-bottom:16px;}
+.nline.ok{background:var(--green-border);}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.5rem;box-shadow:var(--shadow);margin-bottom:1rem;}
+.cnum{font-size:10px;font-weight:500;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+.ctit{font-size:16px;font-weight:500;margin-bottom:4px;}
+.cdesc{font-size:13px;color:var(--text2);line-height:1.55;}
+
+/* DROP */
+.drop{border:2px dashed var(--border2);border-radius:var(--r);padding:2.5rem 2rem;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:var(--surface2);margin-top:14px;}
+.drop:hover,.drop.over{border-color:var(--green);background:var(--green-bg);}
+.drop.loaded{border-style:solid;border-color:var(--green-border);background:var(--green-bg);}
+.drop input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.dico{width:44px;height:44px;border-radius:11px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 11px;}
+.dico svg{width:20px;height:20px;stroke:var(--text2);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
+.drop.loaded .dico svg{stroke:var(--green);}
+.dtit{font-size:14px;font-weight:500;}.dsub{font-size:12px;color:var(--text2);margin-top:3px;}
+.fmt{display:inline-block;font-size:11px;padding:2px 8px;border-radius:4px;background:var(--surface);border:1px solid var(--border);color:var(--text3);font-family:'DM Mono',monospace;margin-top:9px;}
+
+/* PILLS */
+.pills{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap;}
+.pill{font-size:12px;padding:3px 11px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);}
+.pill.g{background:var(--green-bg);border-color:var(--green-border);color:var(--green);}
+
+/* FIELD */
+.field{margin-top:14px;}
+.field label{font-size:12px;font-weight:500;color:var(--text2);display:block;margin-bottom:5px;}
+input[type=text]{width:100%;font-size:13px;padding:9px 11px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;outline:none;transition:border-color .15s;}
+input[type=text]:focus{border-color:var(--green);}
+textarea{width:100%;font-size:12px;padding:9px 11px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;outline:none;resize:vertical;line-height:1.6;}
+textarea:focus{border-color:var(--green);}
+
+/* FILE CARDS */
+.file-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;}
+.fcard{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:12px 14px;transition:all .2s;}
+.fcard.ready{background:var(--green-bg);border-color:var(--green-border);}
+.fcard.fetching{background:var(--amber-bg);border-color:var(--amber-border);}
+.fcard-num{font-size:10px;font-weight:500;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;}
+.fcard.ready .fcard-num{color:var(--green);}
+.fcard.fetching .fcard-num{color:var(--amber);}
+.fcard-name{font-size:13px;font-weight:500;color:var(--text);}
+.fcard-desc{font-size:11px;color:var(--text3);margin-top:3px;line-height:1.4;}
+.fcard-status{font-size:11px;margin-top:8px;font-weight:500;}
+.fcard.ready .fcard-status{color:var(--green);}
+.fcard.fetching .fcard-status{color:var(--amber);}
+
+/* PROGRESS */
+.prog{margin-top:14px;}
+.ptop{display:flex;justify-content:space-between;margin-bottom:6px;}
+.plbl{font-size:13px;font-weight:500;}.pct{font-size:12px;color:var(--text3);font-family:'DM Mono',monospace;}
+.pbar{height:7px;background:var(--border);border-radius:4px;overflow:hidden;}
+.pfill{height:100%;background:var(--green);border-radius:4px;transition:width .3s ease;}
+.pstats{display:flex;gap:12px;margin-top:8px;}
+.pstat{font-size:12px;color:var(--text2);}.pstat span{font-weight:500;}
+.pstat.g span{color:var(--green);}.pstat.r span{color:var(--red);}
+
+/* RES LIST */
+.rlist{margin-top:10px;display:flex;flex-direction:column;gap:4px;max-height:200px;overflow-y:auto;}
+.ri{display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--border);border-radius:var(--rs);background:var(--surface);transition:all .18s;}
+.ri.fetching{border-color:var(--amber-border);background:var(--amber-bg);}
+.ri.ok{border-color:var(--green-border);background:var(--green-bg);}
+.ri.err{border-color:var(--red-border);background:var(--red-bg);}
+.rii{font-size:13px;width:20px;text-align:center;flex-shrink:0;}
+.rin{flex:1;min-width:0;}
+.rina{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.riurl{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
+.rist{font-size:10px;font-weight:500;flex-shrink:0;white-space:nowrap;}
+.ri.fetching .rist{color:var(--amber);}.ri.ok .rist{color:var(--green);}.ri.err .rist{color:var(--red);}
+.spinner{width:12px;height:12px;border:2px solid var(--amber-border);border-top-color:var(--amber);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* IBOX */
+.ibox{display:flex;gap:9px;padding:10px 12px;border-radius:var(--rs);margin-top:12px;}
+.ibox svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0;margin-top:1px;}
+.ibox p{font-size:12px;line-height:1.6;}
+.ibox.info{background:var(--blue-bg);border:1px solid var(--blue-border);color:var(--blue);}
+
+/* BUTTONS */
+.btn{font-size:13px;font-weight:500;padding:10px 20px;border-radius:var(--rs);border:none;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:7px;}
+.btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.btn-green{background:var(--green);color:white;}.btn-green:hover{background:var(--green-dark);}
+.btn-green:disabled{opacity:.4;cursor:not-allowed;}
+.btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border2);}
+.btn-ghost:hover{background:var(--surface2);}
+.btn-sm{font-size:11px;padding:5px 12px;}
+.brow{display:flex;gap:8px;align-items:center;margin-top:16px;flex-wrap:wrap;}
+
+/* DOWNLOAD SECTION */
+.dl-grid{display:flex;flex-direction:column;gap:10px;margin-top:16px;}
+.dl-item{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--green-bg);border:1px solid var(--green-border);border-radius:var(--rs);}
+.dl-info{flex:1;}
+.dl-name{font-size:13px;font-weight:500;color:var(--green-dark);}
+.dl-desc{font-size:11px;color:var(--green);margin-top:2px;}
+.dl-btn{font-size:11px;font-weight:500;padding:6px 14px;border-radius:var(--rs);border:none;cursor:pointer;background:var(--green);color:white;display:inline-flex;align-items:center;gap:6px;flex-shrink:0;transition:opacity .15s;}
+.dl-btn:hover{opacity:.85;}
+.dl-btn svg{width:12px;height:12px;stroke:white;fill:none;stroke-width:2;}
+
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="header">
+  <div class="logo">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
+  </div>
+  <h1>Digipad → 1cours1bot</h1>
+  <p>Déposez votre export Digipad et obtenez 4 fichiers prêts pour 1cours1bot.</p>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <div class="nd"><div class="nc on" id="nc1">1</div><div class="nl on" id="nl1">Import</div></div>
+  <div class="nline" id="nl12"></div>
+  <div class="nd"><div class="nc" id="nc2">2</div><div class="nl" id="nl2">Paramètres</div></div>
+  <div class="nline" id="nl23"></div>
+  <div class="nd"><div class="nc" id="nc3">3</div><div class="nl" id="nl3">Génération</div></div>
+  <div class="nline" id="nl34"></div>
+  <div class="nd"><div class="nc" id="nc4">4</div><div class="nl" id="nl4">Fichiers</div></div>
+</div>
+
+<!-- STEP 1 -->
+<div id="s1">
+  <div class="card">
+    <div class="cnum">Étape 1</div>
+    <div class="ctit">Importez votre Digipad</div>
+    <div class="cdesc">Dans Digipad.app : Menu (⋯) → Exporter → JSON.</div>
+    <div class="drop" id="drop" ondragover="onOver(event)" ondragleave="onLeave()" ondrop="onDrop(event)">
+      <input type="file" accept=".json" onchange="onFile(event)">
+      <div class="dico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg></div>
+      <div class="dtit" id="dtit">Déposez votre fichier JSON ici</div>
+      <div class="dsub" id="dsub">ou cliquez pour parcourir</div>
+      <span class="fmt">.json — export Digipad</span>
+    </div>
+    <div id="resarea" style="display:none">
+      <div class="pills" id="rpills"></div>
+    </div>
+    <div class="brow">
+      <button class="btn btn-green" id="btn1" onclick="show(2)" disabled>
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>Continuer
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 2 : PARAMÈTRES -->
+<div id="s2" style="display:none">
+  <div class="card">
+    <div class="cnum">Étape 2</div>
+    <div class="ctit">Paramètres du chatbot</div>
+    <div class="cdesc">Ces informations personnalisent le prompt système généré pour 1cours1bot.</div>
+
+    <div class="field">
+      <label>Nom du chatbot</label>
+      <input type="text" id="bot-name" placeholder="ex : AssistantIA, MonChatbot…">
+    </div>
+    <div class="field">
+      <label>Nom de la formation</label>
+      <input type="text" id="formation-name" placeholder="ex : L'IA dans sa pratique en classe">
+    </div>
+    <div class="field">
+      <label>Public cible</label>
+      <input type="text" id="public" placeholder="ex : Enseignants du secondaire, académie Orléans-Tours">
+    </div>
+    <div class="field">
+      <label>Instructions supplémentaires pour le chatbot (optionnel)</label>
+      <textarea id="extra-instructions" rows="3" placeholder="ex : Toujours proposer un lien en fin de réponse. Rester dans le cadre de la formation…"></textarea>
+    </div>
+
+    <div class="card" style="background:var(--surface2);box-shadow:none;margin-top:16px;">
+      <div class="cnum">Fichiers qui seront générés</div>
+      <div class="file-grid">
+        <div class="fcard ready">
+          <div class="fcard-num">Fichier 1</div>
+          <div class="fcard-name">Structure Digipad</div>
+          <div class="fcard-desc">Toutes les colonnes, cartes et liens du pad</div>
+          <div class="fcard-status">✓ Prêt instantanément</div>
+        </div>
+        <div class="fcard ready">
+          <div class="fcard-num">Fichier 2</div>
+          <div class="fcard-name">Outils & utilités</div>
+          <div class="fcard-desc">Liste des outils avec descriptions et liens</div>
+          <div class="fcard-status">✓ Prêt instantanément</div>
+        </div>
+        <div class="fcard ready">
+          <div class="fcard-num">Fichier 3</div>
+          <div class="fcard-name">Prompt système</div>
+          <div class="fcard-desc">Instructions optimisées pour 1cours1bot</div>
+          <div class="fcard-status">✓ Prêt instantanément</div>
+        </div>
+        <div class="fcard fetching">
+          <div class="fcard-num">Fichier 4</div>
+          <div class="fcard-name">Contenu des URLs</div>
+          <div class="fcard-desc">Texte extrait de chaque page web</div>
+          <div class="fcard-status">⏳ Nécessite un fetch serveur</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="brow">
+      <button class="btn btn-ghost" onclick="show(1)">← Retour</button>
+      <button class="btn btn-green" onclick="show(3);startGeneration()">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>Générer les fichiers
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 3 : GÉNÉRATION -->
+<div id="s3" style="display:none">
+  <div class="card">
+    <div class="cnum">Étape 3</div>
+    <div class="ctit">Génération en cours</div>
+
+    <!-- Fichiers 1-2-3 instantanés -->
+    <div id="instant-status" style="margin-top:14px">
+      <div class="ibox info">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
+        <p id="instant-msg">Génération des fichiers 1, 2 et 3…</p>
+      </div>
+    </div>
+
+    <!-- Fichier 4 : fetch URLs -->
+    <div id="fetch-section" style="display:none;margin-top:16px">
+      <div style="font-size:13px;font-weight:500;margin-bottom:10px;color:var(--text)">Fichier 4 — Extraction des URLs</div>
+      <div class="prog">
+        <div class="ptop">
+          <span class="plbl" id="plbl">Initialisation…</span>
+          <span class="pct" id="pct">0 / 0</span>
+        </div>
+        <div class="pbar"><div class="pfill" id="pfill" style="width:0%"></div></div>
+        <div class="pstats">
+          <div class="pstat g">✓ <span id="nok">0</span> lues</div>
+          <div class="pstat r">✗ <span id="nerr">0</span> erreurs</div>
+        </div>
+      </div>
+      <div class="rlist" id="flist" style="margin-top:10px;max-height:220px"></div>
+    </div>
+
+    <div class="brow" id="s3btns">
+      <button class="btn btn-ghost" id="btnstop" onclick="stopFetch()" style="display:none">⏹ Arrêter</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 4 : DOWNLOAD -->
+<div id="s4" style="display:none">
+  <div class="card">
+    <div class="cnum">Étape 4</div>
+    <div class="ctit">Vos fichiers sont prêts !</div>
+    <div class="cdesc">Téléchargez chaque fichier et déposez-les dans 1cours1bot comme sources.</div>
+
+    <div class="dl-grid" id="dl-grid"></div>
+
+    <div class="ibox info" style="margin-top:16px">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      <p>Dans 1cours1bot : déposez ces fichiers dans <strong>Sources</strong>, puis copiez le contenu du <strong>Prompt système</strong> dans le champ <strong>Instructions</strong>.</p>
+    </div>
+
+    <div class="brow">
+      <button class="btn btn-ghost" onclick="location.reload()">
+        <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+        Nouveau pad
+      </button>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+const S={pad:null,resources:[],results:[],files:{},stopped:false};
+const ICO={web:'🔗',pdf:'📄',video:'🎬',image:'🖼️',gdoc:'📝'};
+
+// NAV
+function setNav(n){
+  for(let i=1;i<=4;i++){
+    const c=document.getElementById('nc'+i),l=document.getElementById('nl'+i);
+    if(i<n){c.className='nc ok';c.textContent='✓';l.className='nl ok';}
+    else if(i===n){c.className='nc on';c.textContent=i;l.className='nl on';}
+    else{c.className='nc';c.textContent=i;l.className='nl';}
+    if(i<4)document.getElementById('nl'+i+(i+1)).className='nline'+(i<n?' ok':'');
+  }
+}
+function show(n){
+  [1,2,3,4].forEach(i=>document.getElementById('s'+i).style.display=i===n?'block':'none');
+  setNav(n);window.scrollTo(0,0);
+}
+
+// DROP
+function onOver(e){e.preventDefault();document.getElementById('drop').classList.add('over');}
+function onLeave(){document.getElementById('drop').classList.remove('over');}
+function onDrop(e){e.preventDefault();document.getElementById('drop').classList.remove('over');if(e.dataTransfer.files[0])processFile(e.dataTransfer.files[0]);}
+function onFile(e){if(e.target.files[0])processFile(e.target.files[0]);}
+
+function processFile(file){
+  if(!file.name.endsWith('.json')){alert('Fichier .json requis');return;}
+  const r=new FileReader();
+  r.onload=e=>{try{S.pad=JSON.parse(e.target.result);parseResources();}catch{alert('JSON invalide');}};
+  r.readAsText(file);
+}
+
+function parseResources(){
+  const urlRe=/https?:\/\/[^\s"'<>\)\]\}]+/g;
+  const seen=new Set();const res=[];
+  const clean=u=>u.replace(/[.,;!?:]+$/,'');
+  const add=(url,title,type,col)=>{
+    const u=clean(url);
+    if(seen.has(u)||u.length<12)return;
+    seen.add(u);
+    res.push({url:u,title:title||u,type:type||guessType(u),col:col||''});
+  };
+
+  const blocs=S.pad.blocs||S.pad.notes||S.pad.cards||[];
+  const colonnesRaw=S.pad.pad?.colonnes||S.pad.colonnes||'[]';
+  let colonnes=[];
+  try{colonnes=JSON.parse(colonnesRaw);}catch{}
+
+  blocs.forEach(b=>{
+    const colIdx=parseInt(b.colonne||b.column||0);
+    const col=colonnes[colIdx]||'';
+    const titre=b.titre||b.title||b.name||'';
+    const media=b.media||b.url||'';
+    const texte=b.texte||b.text||b.description||'';
+    if(media&&media.startsWith('http'))add(media,titre,b.type,col);
+    const all=[texte].filter(Boolean).join(' ');
+    (all.match(urlRe)||[]).forEach(u=>add(u,'',null,col));
+  });
+  if(!res.length)(JSON.stringify(S.pad).match(urlRe)||[]).forEach(u=>add(u,'',null,''));
+  S.resources=res;
+
+  const types={};res.forEach(r=>{types[r.type]=(types[r.type]||0)+1;});
+  const TL={web:'Sites web',pdf:'PDFs',video:'Vidéos',image:'Images',gdoc:'Google Docs'};
+  document.getElementById('rpills').innerHTML=
+    `<div class="pill g">${res.length} URLs détectées</div>`+
+    Object.entries(types).map(([t,n])=>`<div class="pill">${n} ${TL[t]||t}</div>`).join('');
+  document.getElementById('resarea').style.display='block';
+
+  const padName=S.pad.pad?.titre||S.pad.titre||'Digipad';
+  document.getElementById('drop').classList.add('loaded');
+  document.getElementById('dtit').textContent=`${res.length} URLs détectées`;
+  document.getElementById('dsub').textContent=`"${padName}"`;
+  document.getElementById('btn1').disabled=false;
+
+  // Pre-fill formation name
+  if(!document.getElementById('formation-name').value){
+    document.getElementById('formation-name').value=padName;
+  }
+}
+
+function guessType(url){
+  const u=url.toLowerCase();
+  if(u.includes('.pdf'))return 'pdf';
+  if(u.match(/\.(jpg|jpeg|png|gif|webp|svg)/))return 'image';
+  if(u.includes('youtube.com')||u.includes('youtu.be'))return 'video';
+  if(u.includes('drive.google.com')||u.includes('docs.google.com'))return 'gdoc';
+  return 'web';
+}
+function stripHtml(h){
+  return h.replace(/<[^>]*>/g,' ')
+    .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>')
+    .replace(/&nbsp;/g,' ').replace(/&eacute;/g,'é').replace(/&egrave;/g,'è')
+    .replace(/&agrave;/g,'à').replace(/&ccedil;/g,'ç').replace(/&ecirc;/g,'ê')
+    .replace(/&quot;/g,'"').replace(/&#[0-9]+;/g,' ')
+    .replace(/\s+/g,' ').trim();
+}
+
+// GENERATION
+async function startGeneration(){
+  // Generate files 1, 2, 3 instantly
+  generateFile1();
+  generateFile2();
+  generateFile3();
+  document.getElementById('instant-msg').textContent='✓ Fichiers 1, 2 et 3 générés !';
+
+  // Start file 4 fetch
+  document.getElementById('fetch-section').style.display='block';
+  document.getElementById('btnstop').style.display='inline-flex';
+  await startFetch();
+}
+
+// FILE 1 : Structure Digipad
+function generateFile1(){
+  const blocs=S.pad.blocs||S.pad.notes||S.pad.cards||[];
+  const colonnesRaw=S.pad.pad?.colonnes||S.pad.colonnes||'[]';
+  let colonnes=[];try{colonnes=JSON.parse(colonnesRaw);}catch{}
+  const padName=S.pad.pad?.titre||S.pad.titre||'Digipad';
+  const now=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
+
+  const L=[];
+  const hr=(c,n)=>c.repeat(n);
+  L.push(hr('=',70));
+  L.push(`STRUCTURE DU DIGIPAD — ${padName.toUpperCase()}`);
+  L.push(`Généré le ${now} · ${blocs.length} ressources · ${colonnes.length} colonnes`);
+  L.push(hr('=',70));L.push('');
+
+  // Group by column
+  const byCol={};
+  blocs.forEach(b=>{
+    const idx=String(parseInt(b.colonne||b.column||0));
+    if(!byCol[idx])byCol[idx]=[];
+    byCol[idx].push(b);
+  });
+
+  colonnes.forEach((col,idx)=>{
+    const colBlocs=byCol[String(idx)]||[];
+    if(!colBlocs.length)return;
+    L.push('');L.push(hr('━',70));
+    L.push(`COLONNE ${idx+1} : ${col.trim().toUpperCase()}`);
+    L.push(hr('━',70));
+    colBlocs.forEach(b=>{
+      const titre=b.titre||b.title||b.name||'';
+      const texte=stripHtml(b.texte||b.text||b.description||'');
+      const media=b.media||b.url||'';
+      L.push('');
+      if(titre)L.push(`▶ ${titre}`);
+      if(texte&&texte.length>3)L.push(`   ${texte.substring(0,400)}${texte.length>400?'…':''}`);
+      if(media&&media.startsWith('http'))L.push(`   → ${media}`);
+    });
+  });
+
+  L.push('');L.push(hr('=',70));L.push('FIN DU DOCUMENT');L.push(hr('=',70));
+  S.files.f1=L.join('\n');
+}
+
+// FILE 2 : Outils & utilités
+function generateFile2(){
+  const blocs=S.pad.blocs||S.pad.notes||S.pad.cards||[];
+  const colonnesRaw=S.pad.pad?.colonnes||S.pad.colonnes||'[]';
+  let colonnes=[];try{colonnes=JSON.parse(colonnesRaw);}catch{}
+  const padName=S.pad.pad?.titre||S.pad.titre||'Digipad';
+  const now=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
+
+  const L=[];
+  const hr=(c,n)=>c.repeat(n);
+  L.push(hr('=',70));
+  L.push(`OUTILS ET RESSOURCES — ${padName.toUpperCase()}`);
+  L.push(`Généré le ${now}`);
+  L.push(hr('=',70));L.push('');
+
+  // Group by column, list tools with URL
+  const byCol={};
+  blocs.forEach(b=>{
+    const idx=String(parseInt(b.colonne||b.column||0));
+    if(!byCol[idx])byCol[idx]=[];
+    byCol[idx].push(b);
+  });
+
+  colonnes.forEach((col,idx)=>{
+    const colBlocs=(byCol[String(idx)]||[]).filter(b=>{
+      const media=b.media||b.url||'';
+      return media&&media.startsWith('http');
+    });
+    if(!colBlocs.length)return;
+    L.push('');L.push(hr('─',50));
+    L.push(col.trim().toUpperCase());
+    L.push(hr('─',50));
+    colBlocs.forEach(b=>{
+      const titre=b.titre||b.title||b.name||'';
+      const texte=stripHtml(b.texte||b.text||b.description||'');
+      const media=b.media||b.url||'';
+      L.push('');
+      if(titre)L.push(`• ${titre}`);
+      if(texte&&texte.length>3)L.push(`  ${texte.substring(0,300)}${texte.length>300?'…':''}`);
+      if(media)L.push(`  ${media}`);
+    });
+  });
+
+  L.push('');L.push(hr('=',70));L.push('FIN DU DOCUMENT');L.push(hr('=',70));
+  S.files.f2=L.join('\n');
+}
+
+// FILE 3 : Prompt système enrichi pédagogique
+function generateFile3(){
+  const padName=document.getElementById('formation-name').value.trim()||S.pad.pad?.titre||'Formation';
+  const botName=document.getElementById('bot-name').value.trim()||'Assistant';
+  const publicCible=document.getElementById('public').value.trim()||'enseignants stagiaires';
+  const extra=document.getElementById('extra-instructions').value.trim();
+  const colonnesRaw=S.pad.pad?.colonnes||S.pad.colonnes||'[]';
+  let colonnes=[];try{colonnes=JSON.parse(colonnesRaw);}catch{}
+
+  const blocs=S.pad.blocs||S.pad.notes||S.pad.cards||[];
+  const byCol={};
+  blocs.forEach(b=>{
+    const idx=String(parseInt(b.colonne||b.column||0));
+    if(!byCol[idx])byCol[idx]=[];
+    byCol[idx].push(b);
+  });
+
+  const L=[];
+
+  // IDENTITÉ
+  L.push(`Tu es ${botName}, l'assistant pédagogique du Digipad de la formation "${padName}".`);
+  L.push(`Tu accompagnes les ${publicCible} avant, pendant et après la formation sur l'IA en éducation.`);
+  L.push('');
+
+  // RÔLE DÉTAILLÉ
+  L.push('## TON RÔLE');
+  L.push(`Tu as trois missions complémentaires :`);
+  L.push(`1. **Pendant la formation** : aider les stagiaires à retrouver rapidement une ressource vue en formation, un lien, un outil mentionné par le formateur.`);
+  L.push(`2. **Après la formation** : accompagner la mise en pratique en classe en orientant vers les ressources les plus adaptées à leur situation (niveau, discipline, objectif pédagogique).`);
+  L.push(`3. **Pour aller plus loin** : proposer des pistes de réflexion, des ressources complémentaires, des questions pour approfondir.`);
+  L.push('');
+
+  // TON PÉDAGOGIQUE
+  L.push('## TON STYLE PÉDAGOGIQUE');
+  L.push(`- Tu adoptes un ton **pédagogique et socratique** : tu ne te contentes pas de donner une réponse, tu aides l'enseignant à construire sa propre réflexion.`);
+  L.push(`- Tu **questionnes** autant que tu réponds : "Quel niveau enseignez-vous ?", "Quel est votre objectif ?", "Avez-vous déjà essayé... ?"`);
+  L.push(`- Tu **valorises** les questions, même les plus simples : il n'y a pas de question naïve sur l'IA.`);
+  L.push(`- Tu **rassures** face aux craintes légitimes (peur de la triche, peur d'être remplacé, complexité technique).`);
+  L.push(`- Tu **contextualises** chaque ressource : tu expliques pourquoi elle est utile et dans quel cas l'utiliser.`);
+  L.push(`- Tu proposes **toujours une question de réflexion** en fin de réponse pour encourager la mise en pratique.`);
+  L.push(`- Tu réponds en français, de façon claire et structurée.`);
+  L.push('');
+
+  // CE QUE TU NE FAIS PAS
+  L.push('## CE QUE TU NE FAIS PAS');
+  L.push(`- Tu ne juges pas les pratiques actuelles des enseignants.`);
+  L.push(`- Tu ne donnes pas d'avis sur des sujets hors formation (politique, actualité...).`);
+  L.push(`- Tu ne prétends pas connaître ce qui n'est pas dans tes sources : tu le dis honnêtement.`);
+  L.push(`- Tu ne recommandes pas d'outils qui collectent des données personnelles d'élèves sans préciser la précaution à prendre.`);
+  L.push('');
+
+  // QUESTIONS FRÉQUENTES
+  L.push('## QUESTIONS FRÉQUENTES — RÉPONSES TYPES');
+  L.push('');
+  L.push('**"Par où commencer avec l\'IA ?"**');
+  L.push('→ Commencer par observer ce que font déjà vos élèves. Puis tester un outil simple comme Mistral AI ou ChatGPT sur une tâche de préparation de cours — pas encore avec les élèves. La formation vous donne un cadre pour avancer progressivement.');
+  L.push('');
+  L.push('**"Est-ce que mes élèves ont le droit d\'utiliser l\'IA ?"**');
+  L.push('→ Cela dépend du niveau. Le cadre d\'usage officiel (juin 2025) dit : sensibilisation au primaire, usage encadré dès la 4e, usage autonome possible au lycée dans un cadre défini par l\'enseignant. Lien : https://www.education.gouv.fr/cadre-d-usage-de-l-ia-en-education-450647');
+  L.push('');
+  L.push('**"J\'ai peur que mes élèves trichent avec l\'IA."**');
+  L.push('→ C\'est une préoccupation légitime et partagée par tous. La formation aborde ce sujet : repenser ses évaluations, utiliser l\'IA comme outil de co-construction plutôt que de substitution, et développer la métacognition des élèves. Voulez-vous que je vous oriente vers les ressources spécifiques sur ce sujet ?');
+  L.push('');
+  L.push('**"Quel outil IA utiliser avec mes élèves ?"**');
+  L.push('→ Cela dépend de votre objectif. Pour créer un chatbot pédagogique : 1cours1bot ou Mizou. Pour différencier : Diffit. Pour générer des questions : Quiz Wizard. Pour sensibiliser aux enjeux : ComparIA. Quel est votre objectif principal ?');
+  L.push('');
+  L.push('**"Comment créer un chatbot pour mes élèves ?"**');
+  L.push('→ La formation propose plusieurs outils accessibles sans compétences techniques. 1cours1bot (https://edubot.fr) permet de créer un chatbot depuis des documents en quelques minutes. Un tutoriel est disponible dans le Digipad. Avez-vous déjà un contenu de cours que vous voudriez transformer en chatbot ?');
+  L.push('');
+  L.push('**"L\'IA va-t-elle remplacer les enseignants ?"**');
+  L.push('→ Non. L\'IA peut automatiser certaines tâches répétitives, mais la relation humaine, le discernement pédagogique, l\'adaptation au contexte d\'une classe — ce sont des compétences irremplaçables. La vraie question est : comment l\'IA peut-elle vous libérer du temps pour ce qui a vraiment de la valeur ?');
+  L.push('');
+
+  if(extra){
+    L.push('## INSTRUCTIONS SPÉCIFIQUES DU FORMATEUR');
+    L.push(extra);
+    L.push('');
+  }
+
+  // STRUCTURE DU DIGIPAD
+  L.push('## STRUCTURE DU DIGIPAD');
+  L.push(`Le Digipad "${padName}" est organisé en ${colonnes.length} sections :`);
+  colonnes.forEach((col,idx)=>{
+    const nb=(byCol[String(idx)]||[]).length;
+    if(nb>0)L.push(`${idx+1}. ${col.trim()} (${nb} ressources)`);
+  });
+  L.push('');
+
+  // TOUTES LES RESSOURCES PAR SECTION
+  L.push('## RESSOURCES DU DIGIPAD PAR SECTION');
+  L.push('');
+  colonnes.forEach((col,idx)=>{
+    const colBlocs=byCol[String(idx)]||[];
+    if(!colBlocs.length)return;
+    L.push(`### ${col.trim()}`);
+    colBlocs.forEach(b=>{
+      const titre=b.titre||b.title||b.name||'';
+      const media=b.media||b.url||'';
+      const texte=stripHtml(b.texte||b.text||b.description||'');
+      let line='- ';
+      if(titre)line+=`**${titre}**`;
+      if(texte&&texte.length>3)line+=` : ${texte.substring(0,250)}${texte.length>250?'…':''}`;
+      if(media&&media.startsWith('http'))line+=` → ${media}`;
+      if(line.length>2)L.push(line);
+    });
+    L.push('');
+  });
+
+  // CONCLUSION
+  L.push('## CONSIGNE FINALE');
+  L.push(`Réponds aux questions en t'appuyant sur ces ressources.`);
+  L.push(`Si une ressource a un lien, cite-le toujours.`);
+  L.push(`Si tu ne trouves pas d'information précise dans le Digipad, dis-le honnêtement et propose une piste de réflexion.`);
+  L.push(`Termine chaque réponse par une question qui encourage l'enseignant à passer à l'action ou à approfondir sa réflexion.`);
+
+  S.files.f3=L.join('\n');
+}
+
+// FILE 4 : Fetch URLs
+async function startFetch(){
+  S.results=S.resources.map(r=>({...r,content:'',status:'pending'}));
+  const total=S.results.length;
+  let ok=0,err=0;
+  S.stopped=false;
+
+  document.getElementById('pct').textContent=`0 / ${total}`;
+  document.getElementById('flist').innerHTML=S.results.map((r,i)=>`
+    <div class="ri" id="fi${i}">
+      <div class="rii">${ICO[r.type]||'🔗'}</div>
+      <div class="rin">
+        <div class="rina">${r.title!==r.url?r.title:r.url.replace(/^https?:\/\//,'').substring(0,50)}</div>
+        <div class="riurl">${r.url}</div>
+      </div>
+      <div class="rist" id="fs${i}">En attente</div>
+    </div>`).join('');
+
+  for(let i=0;i<S.results.length;i++){
+    if(S.stopped)break;
+    const res=S.results[i];
+    setRI(i,'fetching',null);
+    document.getElementById('plbl').textContent=res.url.replace(/^https?:\/\//,'').substring(0,48)+'…';
+    let attempts=0;
+    while(attempts<2){
+      try{
+        const r=await fetch('/api/fetch-url',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:res.url,type:res.type})});
+        const d=await r.json();
+        res.content=d.content||'';res.status='ok';ok++;
+        const wc=res.content.split(/\s+/).filter(Boolean).length;
+        setRI(i,'ok',`✓ ${wc} mots`);break;
+      }catch(e){
+        attempts++;
+        if(attempts<2)await sleep(2000);
+        else{res.status='err';err++;setRI(i,'err','✗');}
+      }
+    }
+    const done=i+1;
+    document.getElementById('pct').textContent=`${done} / ${total}`;
+    document.getElementById('pfill').style.width=`${(done/total)*100}%`;
+    document.getElementById('nok').textContent=ok;
+    document.getElementById('nerr').textContent=err;
+    if(i<S.results.length-1&&!S.stopped)await sleep(100);
+  }
+
+  document.getElementById('plbl').textContent=S.stopped?'Arrêté':'Extraction terminée !';
+  document.getElementById('btnstop').style.display='none';
+  generateFile4();
+  showDownloads();
+}
+
+function setRI(i,state,label){
+  const el=document.getElementById('fi'+i),st=document.getElementById('fs'+i);
+  if(!el)return;
+  el.className='ri '+(state==='fetching'?'fetching':state==='ok'?'ok':'err');
+  st.innerHTML=state==='fetching'?'<div class="spinner"></div>':label||'';
+  el.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function stopFetch(){S.stopped=true;document.getElementById('plbl').textContent='Arrêt…';document.getElementById('btnstop').disabled=true;}
+
+// FILE 4 content
+function generateFile4(){
+  const padName=S.pad.pad?.titre||S.pad.titre||'Digipad';
+  const colonnesRaw=S.pad.pad?.colonnes||S.pad.colonnes||'[]';
+  let colonnes=[];try{colonnes=JSON.parse(colonnesRaw);}catch{}
+  const ok=S.results.filter(r=>r.status==='ok').length;
+  const err=S.results.filter(r=>r.status==='err').length;
+  const now=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
+
+  const L=[];
+  const hr=(c,n)=>c.repeat(n);
+  L.push(hr('=',70));
+  L.push(`CONTENU DES RESSOURCES WEB — ${padName.toUpperCase()}`);
+  L.push(`Généré le ${now} · ${ok} ressources extraites · ${err} inaccessibles`);
+  L.push(hr('=',70));L.push('');
+
+  // Group results by column
+  const blocs=S.pad.blocs||S.pad.notes||S.pad.cards||[];
+  const byCol={};
+  blocs.forEach(b=>{
+    const idx=String(parseInt(b.colonne||b.column||0));
+    if(!byCol[idx])byCol[idx]=[];
+    byCol[idx].push(b.media||b.url||'');
+  });
+
+  colonnes.forEach((col,idx)=>{
+    const colUrls=new Set(byCol[String(idx)]||[]);
+    const colResults=S.results.filter(r=>colUrls.has(r.url)&&r.status==='ok');
+    if(!colResults.length)return;
+    L.push('');L.push(hr('━',70));
+    L.push(`COLONNE : ${col.trim().toUpperCase()}`);
+    L.push(hr('━',70));
+    colResults.forEach(res=>{
+      L.push('');L.push(`[${res.type.toUpperCase()}] ${res.url}`);
+      L.push(res.content.trim());
+    });
+  });
+
+  // Orphans
+  const allColUrls=new Set(Object.values(byCol).flat());
+  const orphans=S.results.filter(r=>!allColUrls.has(r.url)&&r.status==='ok');
+  if(orphans.length){
+    L.push('');L.push(hr('━',70));L.push('AUTRES RESSOURCES');L.push(hr('━',70));
+    orphans.forEach(res=>{L.push('');L.push(`[${res.type.toUpperCase()}] ${res.url}`);L.push(res.content.trim());});
+  }
+
+  L.push('');L.push(hr('=',70));L.push('FIN DU DOCUMENT');L.push(hr('=',70));
+  S.files.f4=L.join('\n');
+}
+
+function showDownloads(){
+  show(4);
+  const botName=(document.getElementById('bot-name').value.trim()||'chatbot').toLowerCase().replace(/[^a-z0-9]+/g,'-');
+  const files=[
+    {key:'f1',name:`${botName}-structure.txt`,label:'Structure Digipad',desc:'Colonnes, cartes et liens du pad'},
+    {key:'f2',name:`${botName}-outils.txt`,label:'Outils & utilités',desc:'Liste des outils avec descriptions'},
+    {key:'f3',name:`${botName}-prompt.txt`,label:'Prompt système',desc:'À coller dans "Instructions" de 1cours1bot'},
+    {key:'f4',name:`${botName}-contenu-urls.txt`,label:'Contenu des URLs',desc:'Texte extrait des pages web'},
+  ];
+  document.getElementById('dl-grid').innerHTML=files.map(f=>`
+    <div class="dl-item">
+      <div class="dl-info">
+        <div class="dl-name">${f.label}</div>
+        <div class="dl-desc">${f.desc} · ${(S.files[f.key]||'').split(/\s+/).filter(Boolean).length.toLocaleString('fr')} mots</div>
+      </div>
+      <button class="dl-btn" onclick="doDownload('${f.key}','${f.name}')">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Télécharger
+      </button>
+    </div>`).join('');
+}
+
+function doDownload(key,fname){
+  const txt=S.files[key]||'';
+  try{
+    const blob=new Blob([txt],{type:'text/plain;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download=fname;
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url),1000);return;
+  }catch{}
+  try{
+    const a=document.createElement('a');
+    a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(txt);
+    a.download=fname;document.body.appendChild(a);a.click();document.body.removeChild(a);return;
+  }catch{}
+  const w=window.open('','_blank');
+  if(w){w.document.write('<pre style="font-family:monospace;font-size:12px;padding:2rem;white-space:pre-wrap">'+txt.replace(/</g,'&lt;')+'</pre>');w.document.title=fname;w.document.close();}
+}
+
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+</script>
+</body>
+</html>
